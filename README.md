@@ -6,10 +6,10 @@ The v1 concept is intentionally narrow:
 
 1. A sender shares a music link from Apple Music or Spotify.
 2. The sender chooses the recipient's preferred service.
-3. Listen Link resolves the song to that service.
+3. Listen Link resolves the track or album to that service.
 4. The sender shares a link the recipient can actually open.
 
-This repo starts with fake catalog data so the product flow can be tested before using real music-service APIs or credentials.
+This repo starts with fake catalog data for tracks and albums so the product flow can be tested before using real music-service APIs or credentials.
 
 ## Privacy Posture
 
@@ -38,7 +38,7 @@ Request:
 
 ```json
 {
-  "input_url": "https://music.apple.com/us/song/blinding-lights/1499378108",
+  "input_url": "https://music.apple.com/us/song/1499378607",
   "target_service": "spotify"
 }
 ```
@@ -48,11 +48,17 @@ Response:
 ```json
 {
   "url": "https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b",
+  "share_text": "https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b",
+  "item_type": "track",
   "confidence": "high",
   "source_service": "apple",
   "target_service": "spotify"
 }
 ```
+
+### `GET /examples`
+
+Returns fake track and album examples for local testing. This endpoint is for development only and does not log requests.
 
 ### `GET /health`
 

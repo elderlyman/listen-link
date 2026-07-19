@@ -1,4 +1,5 @@
 import http from "node:http";
+import { fakeCatalog } from "./catalog.js";
 import { resolveLink } from "./resolver.js";
 import { privacySafeMetric } from "./privacy.js";
 
@@ -14,6 +15,10 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "GET" && req.url === "/health") {
     return sendJson(res, 200, { ok: true });
+  }
+
+  if (req.method === "GET" && req.url === "/examples") {
+    return sendJson(res, 200, { ok: true, examples: publicExamples() });
   }
 
   if (req.method === "POST" && req.url === "/resolve") {
@@ -63,6 +68,16 @@ function sendJson(res, statusCode, payload) {
     "cache-control": "no-store"
   });
   res.end(JSON.stringify(payload));
+}
+
+function publicExamples() {
+  return fakeCatalog.map((item) => ({
+    item_type: item.itemType,
+    title: item.title,
+    artist: item.artist,
+    apple: item.links.apple,
+    spotify: item.links.spotify
+  }));
 }
 
 function sendHtml(res, statusCode, html) {
@@ -203,11 +218,16 @@ const homePageHtml = `<!doctype html>
 <body>
   <main>
     <h1>Listen Link</h1>
-    <p>Test the fake Apple Music and Spotify resolver before wiring the iOS Shortcut.</p>
+    <p>Test fake tracks and albums before wiring the iOS Shortcut.</p>
 
     <form id="resolve-form">
+      <label for="sample-link">Sample</label>
+      <select id="sample-link">
+        <option value="">Custom link</option>
+      </select>
+
       <label for="input-url">Shared music link</label>
-      <textarea id="input-url" name="input_url" required>https://music.apple.com/us/song/blinding-lights/1499378108</textarea>
+      <textarea id="input-url" name="input_url" required>https://music.apple.com/us/song/1499378607</textarea>
 
       <label for="target-service">Recipient service</label>
       <select id="target-service" name="target_service">
@@ -225,6 +245,16 @@ const homePageHtml = `<!doctype html>
     const form = document.querySelector("#resolve-form");
     const button = form.querySelector("button");
     const result = document.querySelector("#result");
+    const inputUrl = document.querySelector("#input-url");
+    const sampleLink = document.querySelector("#sample-link");
+
+    loadExamples();
+
+    sampleLink.addEventListener("change", () => {
+      if (sampleLink.value) {
+        inputUrl.value = sampleLink.value;
+      }
+    });
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -250,7 +280,7 @@ const homePageHtml = `<!doctype html>
         if (!response.ok || !data.ok) {
           result.innerHTML = '<span class="error">Could not resolve: ' + escapeHtml(data.reason || "unknown_error") + '</span>';
         } else {
-          result.innerHTML = '<div>Confidence: ' + escapeHtml(data.confidence) + '</div><a href="' + escapeAttribute(data.url) + '" target="_blank" rel="noreferrer">' + escapeHtml(data.url) + '</a>';
+          result.innerHTML = '<div>Type: ' + escapeHtml(data.item_type) + '</div><div>Confidence: ' + escapeHtml(data.confidence) + '</div><a href="' + escapeAttribute(data.url) + '" target="_blank" rel="noreferrer">' + escapeHtml(data.url) + '</a>';
         }
       } catch {
         result.innerHTML = '<span class="error">Could not reach the resolver.</span>';
@@ -260,6 +290,28 @@ const homePageHtml = `<!doctype html>
         button.textContent = "Resolve Link";
       }
     });
+
+    async function loadExamples() {
+      try {
+        const response = await fetch("/examples");
+        const data = await response.json();
+        if (!data.ok) return;
+
+        for (const example of data.examples) {
+          sampleLink.appendChild(exampleOption(example, "apple"));
+          sampleLink.appendChild(exampleOption(example, "spotify"));
+        }
+      } catch {
+        // The form still works with manual URLs if examples cannot load.
+      }
+    }
+
+    function exampleOption(example, service) {
+      const option = document.createElement("option");
+      option.value = example[service];
+      option.textContent = example.item_type + " - " + example.title + " - " + service;
+      return option;
+    }
 
     function escapeHtml(value) {
       return String(value).replace(/[&<>"']/g, (char) => {

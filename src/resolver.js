@@ -18,15 +18,15 @@ export function resolveLink({ input_url: inputUrl, target_service: targetService
     return failure("unsupported_source_service", sourceService, targetService);
   }
 
-  const song = fakeCatalog.find((entry) =>
+  const item = fakeCatalog.find((entry) =>
     Object.values(entry.links).some((link) => sameNormalizedUrl(link, sanitizedUrl))
   );
 
-  if (!song) {
+  if (!item) {
     return failure("not_found_in_fake_catalog", sourceService, targetService);
   }
 
-  const targetUrl = song.links[targetService];
+  const targetUrl = item.links[targetService];
   if (!targetUrl) {
     return failure("target_link_unavailable", sourceService, targetService);
   }
@@ -34,6 +34,8 @@ export function resolveLink({ input_url: inputUrl, target_service: targetService
   return {
     ok: true,
     url: targetUrl,
+    share_text: targetUrl,
+    item_type: item.itemType,
     confidence: sourceService === targetService ? "exact" : "high",
     source_service: sourceService,
     target_service: targetService
