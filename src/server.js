@@ -40,6 +40,10 @@ const server = http.createServer(async (req, res) => {
       durationMs
     })));
 
+    if (body.response_format === "text") {
+      return sendText(res, result.ok ? 200 : 422, result.ok ? result.share_text : result.reason);
+    }
+
     return sendJson(res, result.ok ? 200 : 422, result);
   }
 
@@ -68,6 +72,14 @@ function sendJson(res, statusCode, payload) {
     "cache-control": "no-store"
   });
   res.end(JSON.stringify(payload));
+}
+
+function sendText(res, statusCode, payload) {
+  res.writeHead(statusCode, {
+    "content-type": "text/plain; charset=utf-8",
+    "cache-control": "no-store"
+  });
+  res.end(payload);
 }
 
 function publicExamples() {
@@ -204,6 +216,11 @@ const homePageHtml = `<!doctype html>
       word-break: break-word;
     }
 
+    .result code {
+      color: var(--accent-strong);
+      font-weight: 700;
+    }
+
     .result a {
       color: var(--accent-strong);
       font-weight: 700;
@@ -266,7 +283,8 @@ const homePageHtml = `<!doctype html>
       const formData = new FormData(form);
       const payload = {
         input_url: formData.get("input_url"),
-        target_service: formData.get("target_service")
+        target_service: formData.get("target_service"),
+        response_format: "json"
       };
 
       try {

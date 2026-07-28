@@ -56,6 +56,8 @@ Response:
 }
 ```
 
+To make Shortcuts easier, include `"response_format": "text"` to receive only the resolved link as plain text.
+
 ### `GET /examples`
 
 Returns fake track and album examples for local testing. This endpoint is for development only and does not log requests.
