@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { parseMusicIdentity } from "../src/music-url.js";
 import { resolveLink } from "../src/resolver.js";
 import { validateUrl } from "../src/privacy.js";
 
@@ -15,6 +16,27 @@ test("resolves a fake Apple Music track to Spotify", () => {
   assert.equal(result.share_text, result.url);
   assert.equal(result.source_service, "apple");
   assert.equal(result.target_service, "spotify");
+});
+
+test("resolves an Apple Music album-form track URL to Spotify", () => {
+  const result = resolveLink({
+    input_url: "https://music.apple.com/us/album/blinding-lights/1499378108?i=1499378607&uo=4",
+    target_service: "spotify"
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.item_type, "track");
+  assert.equal(result.url, "https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b");
+});
+
+test("matches Apple Music tracks across storefronts and slugs", () => {
+  const result = resolveLink({
+    input_url: "https://music.apple.com/gb/album/a-different-slug/999999999?i=1499378607",
+    target_service: "spotify"
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.url, "https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b");
 });
 
 test("resolves a fake Spotify album to Apple Music", () => {
@@ -93,8 +115,26 @@ test("rejects unsupported target services", () => {
   assert.equal(result.reason, "unsupported_target_service");
 });
 
-test("preserves URL parameters until service-specific parsing is implemented", () => {
+test("preserves URL parameters during validation", () => {
   const validated = validateUrl("https://music.apple.com/us/album/example/123?i=456&utm_source=messages");
 
   assert.equal(validated, "https://music.apple.com/us/album/example/123?i=456&utm_source=messages");
+});
+
+test("parses Apple Music album URLs without a track parameter as albums", () => {
+  assert.deepEqual(
+    parseMusicIdentity("https://music.apple.com/us/album/after-hours/1499378108"),
+    {
+      service: "apple",
+      itemType: "album",
+      itemId: "1499378108",
+      storefront: "us"
+    }
+  );
+});
+
+test("rejects non-numeric Apple Music track identifiers", () => {
+  assert.throws(() =>
+    parseMusicIdentity("https://music.apple.com/us/album/example/123?i=not-a-track")
+  );
 });
