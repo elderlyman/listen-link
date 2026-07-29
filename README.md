@@ -18,7 +18,8 @@ Be extremely vigilant about data leaks.
 - Do not log raw music URLs.
 - Do not log song titles, artist names, sender names, recipient names, phone numbers, or IP-linked history.
 - Do not require user login for the prototype.
-- Strip tracking parameters from incoming URLs.
+- Preserve incoming URL parameters until service-specific identity parsing is
+  implemented; some parameters, such as Apple Music's `i`, identify the track.
 - Cache only neutral identifiers in future real implementations, such as `ISRC -> platform track ID`.
 
 ## Run Locally

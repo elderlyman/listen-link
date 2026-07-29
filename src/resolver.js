@@ -1,15 +1,15 @@
 import { fakeCatalog, SUPPORTED_SERVICES } from "./catalog.js";
-import { detectService, sanitizeUrl } from "./privacy.js";
+import { detectService, validateUrl } from "./privacy.js";
 
 export function resolveLink({ input_url: inputUrl, target_service: requestedTargetService }) {
-  let sanitizedUrl;
+  let validatedUrl;
   try {
-    sanitizedUrl = sanitizeUrl(inputUrl);
+    validatedUrl = validateUrl(inputUrl);
   } catch {
     return failure("invalid_input_url", "unknown", requestedTargetService);
   }
 
-  const sourceService = detectService(sanitizedUrl);
+  const sourceService = detectService(validatedUrl);
   if (sourceService === "unknown") {
     return failure("unsupported_source_service", sourceService, requestedTargetService);
   }
@@ -20,7 +20,7 @@ export function resolveLink({ input_url: inputUrl, target_service: requestedTarg
   }
 
   const item = fakeCatalog.find((entry) =>
-    Object.values(entry.links).some((link) => sameNormalizedUrl(link, sanitizedUrl))
+    Object.values(entry.links).some((link) => sameUrl(link, validatedUrl))
   );
 
   if (!item) {
@@ -51,8 +51,8 @@ function resolveTargetService(requestedTargetService, sourceService) {
   return SUPPORTED_SERVICES.includes(requestedTargetService) ? requestedTargetService : null;
 }
 
-function sameNormalizedUrl(left, right) {
-  return sanitizeUrl(left) === sanitizeUrl(right);
+function sameUrl(left, right) {
+  return validateUrl(left) === validateUrl(right);
 }
 
 function failure(reason, sourceService, targetService) {
