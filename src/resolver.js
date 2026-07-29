@@ -1,21 +1,22 @@
 import { fakeCatalog, SUPPORTED_SERVICES } from "./catalog.js";
 import { detectService, sanitizeUrl } from "./privacy.js";
 
-export function resolveLink({ input_url: inputUrl, target_service: targetService }) {
-  if (!SUPPORTED_SERVICES.includes(targetService)) {
-    return failure("unsupported_target_service", "unknown", targetService);
-  }
-
+export function resolveLink({ input_url: inputUrl, target_service: requestedTargetService }) {
   let sanitizedUrl;
   try {
     sanitizedUrl = sanitizeUrl(inputUrl);
   } catch {
-    return failure("invalid_input_url", "unknown", targetService);
+    return failure("invalid_input_url", "unknown", requestedTargetService);
   }
 
   const sourceService = detectService(sanitizedUrl);
   if (sourceService === "unknown") {
-    return failure("unsupported_source_service", sourceService, targetService);
+    return failure("unsupported_source_service", sourceService, requestedTargetService);
+  }
+
+  const targetService = resolveTargetService(requestedTargetService, sourceService);
+  if (!targetService) {
+    return failure("unsupported_target_service", sourceService, requestedTargetService);
   }
 
   const item = fakeCatalog.find((entry) =>
@@ -40,6 +41,14 @@ export function resolveLink({ input_url: inputUrl, target_service: targetService
     source_service: sourceService,
     target_service: targetService
   };
+}
+
+function resolveTargetService(requestedTargetService, sourceService) {
+  if (requestedTargetService === "opposite") {
+    return sourceService === "apple" ? "spotify" : "apple";
+  }
+
+  return SUPPORTED_SERVICES.includes(requestedTargetService) ? requestedTargetService : null;
 }
 
 function sameNormalizedUrl(left, right) {

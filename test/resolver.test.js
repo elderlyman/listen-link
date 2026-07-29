@@ -29,6 +29,30 @@ test("resolves a fake Spotify album to Apple Music", () => {
   assert.equal(result.share_text, result.url);
 });
 
+test("resolves an Apple Music source to the opposite service", () => {
+  const result = resolveLink({
+    input_url: "https://music.apple.com/us/song/1499378607",
+    target_service: "opposite"
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.source_service, "apple");
+  assert.equal(result.target_service, "spotify");
+  assert.equal(result.url, "https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b");
+});
+
+test("resolves a Spotify source to the opposite service", () => {
+  const result = resolveLink({
+    input_url: "https://open.spotify.com/track/2Fxmhks0bxGSBdJ92vM42m",
+    target_service: "opposite"
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.source_service, "spotify");
+  assert.equal(result.target_service, "apple");
+  assert.equal(result.url, "https://music.apple.com/us/song/1450695739");
+});
+
 test("returns exact confidence when source and target are the same service", () => {
   const result = resolveLink({
     input_url: "https://open.spotify.com/track/2Fxmhks0bxGSBdJ92vM42m",

@@ -39,7 +39,7 @@ Request:
 ```json
 {
   "input_url": "https://music.apple.com/us/song/1499378607",
-  "target_service": "spotify"
+  "target_service": "opposite"
 }
 ```
 
@@ -56,7 +56,7 @@ Response:
 }
 ```
 
-To make Shortcuts easier, include `"response_format": "text"` to receive only the resolved link as plain text.
+Use `"target_service": "opposite"` to resolve Apple Music links to Spotify and Spotify links to Apple Music. To make Shortcuts easier, include `"response_format": "text"` to receive only the resolved link as plain text.
 
 ### `GET /examples`
 
@@ -71,7 +71,7 @@ Returns service health without checking external dependencies.
 The iOS Shortcut can:
 
 1. Receive a shared URL.
-2. Ask which service the recipient uses.
+2. Confirm sharing to the opposite supported service.
 3. `POST` to `/resolve`.
 4. Copy or share the returned URL.
 
