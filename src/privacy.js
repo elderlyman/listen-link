@@ -1,33 +1,5 @@
-const TRACKING_PARAMS = new Set([
-  "app",
-  "at",
-  "context",
-  "ct",
-  "go",
-  "i",
-  "ls",
-  "mt",
-  "pt",
-  "si",
-  "uo",
-  "utm_campaign",
-  "utm_content",
-  "utm_medium",
-  "utm_source",
-  "utm_term"
-]);
-
-export function sanitizeUrl(input) {
-  const url = new URL(extractFirstUrl(input));
-
-  for (const param of [...url.searchParams.keys()]) {
-    if (TRACKING_PARAMS.has(param.toLowerCase())) {
-      url.searchParams.delete(param);
-    }
-  }
-
-  url.hash = "";
-  return url.toString();
+export function validateUrl(input) {
+  return new URL(extractFirstUrl(input)).toString();
 }
 
 export function extractFirstUrl(input) {

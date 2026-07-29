@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { resolveLink } from "../src/resolver.js";
-import { sanitizeUrl } from "../src/privacy.js";
+import { validateUrl } from "../src/privacy.js";
 
 test("resolves a fake Apple Music track to Spotify", () => {
   const result = resolveLink({
-    input_url: "https://music.apple.com/us/song/1499378607?utm_source=messages",
+    input_url: "https://music.apple.com/us/song/1499378607",
     target_service: "spotify"
   });
 
@@ -93,8 +93,8 @@ test("rejects unsupported target services", () => {
   assert.equal(result.reason, "unsupported_target_service");
 });
 
-test("strips common tracking parameters", () => {
-  const sanitized = sanitizeUrl("https://open.spotify.com/track/abc?si=tracking-id&utm_source=messages");
+test("preserves URL parameters until service-specific parsing is implemented", () => {
+  const validated = validateUrl("https://music.apple.com/us/album/example/123?i=456&utm_source=messages");
 
-  assert.equal(sanitized, "https://open.spotify.com/track/abc");
+  assert.equal(validated, "https://music.apple.com/us/album/example/123?i=456&utm_source=messages");
 });
