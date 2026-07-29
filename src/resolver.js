@@ -1,4 +1,5 @@
 import { fakeCatalog, SUPPORTED_SERVICES } from "./catalog.js";
+import { musicIdentityKey, parseMusicIdentity } from "./music-url.js";
 import { detectService, validateUrl } from "./privacy.js";
 
 export function resolveLink({ input_url: inputUrl, target_service: requestedTargetService }) {
@@ -19,9 +20,17 @@ export function resolveLink({ input_url: inputUrl, target_service: requestedTarg
     return failure("unsupported_target_service", sourceService, requestedTargetService);
   }
 
-  const item = fakeCatalog.find((entry) =>
-    Object.values(entry.links).some((link) => sameUrl(link, validatedUrl))
-  );
+  let inputIdentity;
+  try {
+    inputIdentity = parseMusicIdentity(validatedUrl);
+  } catch {
+    return failure("invalid_input_url", sourceService, targetService);
+  }
+
+  const inputIdentityKey = musicIdentityKey(inputIdentity);
+  const item = fakeCatalog.find((entry) => Object.values(entry.links).some((link) =>
+    musicIdentityKey(parseMusicIdentity(link)) === inputIdentityKey
+  ));
 
   if (!item) {
     return failure("not_found_in_fake_catalog", sourceService, targetService);
@@ -49,10 +58,6 @@ function resolveTargetService(requestedTargetService, sourceService) {
   }
 
   return SUPPORTED_SERVICES.includes(requestedTargetService) ? requestedTargetService : null;
-}
-
-function sameUrl(left, right) {
-  return validateUrl(left) === validateUrl(right);
 }
 
 function failure(reason, sourceService, targetService) {
