@@ -30,6 +30,19 @@ npm start
 
 The server listens on `http://localhost:3000` by default.
 
+## Deploy to Vercel
+
+Connect this repository to a Vercel project and deploy it. The included Vercel
+Functions expose the same public routes used by the local server:
+
+- `POST /resolve`
+- `GET /health`
+
+Point the distributed Shortcut at `https://YOUR_DOMAIN/resolve`. The current
+fake-catalog prototype does not require environment variables. Never commit
+provider credentials; add them through Vercel Environment Variables when live
+catalog lookup is implemented.
+
 ## API
 
 ### `POST /resolve`
