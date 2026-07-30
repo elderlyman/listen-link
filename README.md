@@ -57,8 +57,9 @@ Request:
 
 ```json
 {
-  "input_url": "https://music.apple.com/us/song/1499378607",
-  "target_service": "opposite"
+  "input_url": "https://music.apple.com/us/album/blinding-lights/1488408555?i=1488408568",
+  "target_service": "spotify",
+  "shortcut_version": "1"
 }
 ```
 
@@ -66,16 +67,23 @@ Response:
 
 ```json
 {
-  "url": "https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b",
-  "share_text": "https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b",
-  "item_type": "track",
-  "confidence": "high",
-  "source_service": "apple",
-  "target_service": "spotify"
+  "outcome": "share",
+  "url": "https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b"
 }
 ```
 
-Use `"target_service": "opposite"` to resolve Apple Music links to Spotify and Spotify links to Apple Music. To make Shortcuts easier, include `"response_format": "text"` to receive only the resolved link as plain text.
+Handled failures also return HTTP 200 so Shortcuts can display them like an
+ordinary app alert:
+
+```json
+{
+  "outcome": "alert",
+  "message": "This song isn’t available in Listen Link yet. You can share the original link instead."
+}
+```
+
+The public response contains only fields the Shortcut needs. Internal reason
+codes and privacy-safe operational metrics remain server-side.
 
 ### `GET /examples`
 
@@ -87,11 +95,12 @@ Returns service health without checking external dependencies.
 
 ## Shortcut Prototype
 
-The iOS Shortcut can:
+The iOS Shortcut:
 
-1. Receive a shared URL.
-2. Confirm sharing to the opposite supported service.
-3. `POST` to `/resolve`.
-4. Copy or share the returned URL.
+1. Receives a URL from the Share Sheet.
+2. Asks which service the recipient uses.
+3. Sends `input_url`, `target_service`, and `shortcut_version` to `/resolve`.
+4. Shares `url` when `outcome` is `share`.
+5. Shows `message` in an alert when `outcome` is `alert`.
 
 No Spotify or Apple credentials are needed until the fake-data flow proves useful.
