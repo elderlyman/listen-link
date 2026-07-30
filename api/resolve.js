@@ -1,5 +1,6 @@
 import { privacySafeMetric } from "../src/privacy.js";
 import { resolveLink } from "../src/resolver.js";
+import { shortcutResponse } from "../src/shortcut-response.js";
 
 export default {
   async fetch(request) {
@@ -36,7 +37,7 @@ export default {
       return textResponse(result.ok ? 200 : 422, result.ok ? result.share_text : result.reason);
     }
 
-    return jsonResponse(result.ok ? 200 : 422, result);
+    return jsonResponse(200, shortcutResponse(result));
   }
 };
 

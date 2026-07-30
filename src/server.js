@@ -2,6 +2,7 @@ import http from "node:http";
 import { fakeCatalog } from "./catalog.js";
 import { resolveLink } from "./resolver.js";
 import { privacySafeMetric } from "./privacy.js";
+import { shortcutResponse } from "./shortcut-response.js";
 
 const PORT = Number.parseInt(process.env.PORT || "3000", 10);
 const HOST = process.env.HOST || "127.0.0.1";
@@ -44,7 +45,7 @@ const server = http.createServer(async (req, res) => {
       return sendText(res, result.ok ? 200 : 422, result.ok ? result.share_text : result.reason);
     }
 
-    return sendJson(res, result.ok ? 200 : 422, result);
+    return sendJson(res, 200, shortcutResponse(result));
   }
 
   return sendJson(res, 404, { ok: false, reason: "not_found" });
@@ -244,7 +245,7 @@ const homePageHtml = `<!doctype html>
       </select>
 
       <label for="input-url">Shared music link</label>
-      <textarea id="input-url" name="input_url" required>https://music.apple.com/us/song/1499378607</textarea>
+      <textarea id="input-url" name="input_url" required>https://music.apple.com/us/song/1488408568</textarea>
 
       <label for="target-service">Recipient service</label>
       <select id="target-service" name="target_service">
@@ -284,7 +285,7 @@ const homePageHtml = `<!doctype html>
       const payload = {
         input_url: formData.get("input_url"),
         target_service: formData.get("target_service"),
-        response_format: "json"
+        shortcut_version: "1"
       };
 
       try {
@@ -295,10 +296,10 @@ const homePageHtml = `<!doctype html>
         });
         const data = await response.json();
 
-        if (!response.ok || !data.ok) {
-          result.innerHTML = '<span class="error">Could not resolve: ' + escapeHtml(data.reason || "unknown_error") + '</span>';
+        if (!response.ok || data.outcome !== "share") {
+          result.innerHTML = '<span class="error">' + escapeHtml(data.message || "Listen Link couldn’t convert this song.") + '</span>';
         } else {
-          result.innerHTML = '<div>Type: ' + escapeHtml(data.item_type) + '</div><div>Confidence: ' + escapeHtml(data.confidence) + '</div><a href="' + escapeAttribute(data.url) + '" target="_blank" rel="noreferrer">' + escapeHtml(data.url) + '</a>';
+          result.innerHTML = '<a href="' + escapeAttribute(data.url) + '" target="_blank" rel="noreferrer">' + escapeHtml(data.url) + '</a>';
         }
       } catch {
         result.innerHTML = '<span class="error">Could not reach the resolver.</span>';

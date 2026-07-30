@@ -6,7 +6,7 @@ import { validateUrl } from "../src/privacy.js";
 
 test("resolves a fake Apple Music track to Spotify", () => {
   const result = resolveLink({
-    input_url: "https://music.apple.com/us/song/1499378607",
+    input_url: "https://music.apple.com/us/song/1488408568",
     target_service: "spotify"
   });
 
@@ -20,7 +20,7 @@ test("resolves a fake Apple Music track to Spotify", () => {
 
 test("resolves an Apple Music album-form track URL to Spotify", () => {
   const result = resolveLink({
-    input_url: "https://music.apple.com/us/album/blinding-lights/1499378108?i=1499378607&uo=4",
+    input_url: "https://music.apple.com/us/album/blinding-lights/1488408555?i=1488408568",
     target_service: "spotify"
   });
 
@@ -31,7 +31,7 @@ test("resolves an Apple Music album-form track URL to Spotify", () => {
 
 test("matches Apple Music tracks across storefronts and slugs", () => {
   const result = resolveLink({
-    input_url: "https://music.apple.com/gb/album/a-different-slug/999999999?i=1499378607",
+    input_url: "https://music.apple.com/gb/album/a-different-slug/999999999?i=1488408568",
     target_service: "spotify"
   });
 
@@ -53,7 +53,7 @@ test("resolves a fake Spotify album to Apple Music", () => {
 
 test("resolves an Apple Music source to the opposite service", () => {
   const result = resolveLink({
-    input_url: "https://music.apple.com/us/song/1499378607",
+    input_url: "https://music.apple.com/us/song/1488408568",
     target_service: "opposite"
   });
 
@@ -107,7 +107,7 @@ test("rejects unsupported source services", () => {
 
 test("rejects unsupported target services", () => {
   const result = resolveLink({
-    input_url: "https://music.apple.com/us/song/1499378607",
+    input_url: "https://music.apple.com/us/song/1488408568",
     target_service: "youtube"
   });
 

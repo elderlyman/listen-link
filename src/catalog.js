@@ -8,7 +8,7 @@ export const fakeCatalog = [
     artist: "The Weeknd",
     isrc: "USUG11904206",
     links: {
-      apple: "https://music.apple.com/us/song/1499378607",
+      apple: "https://music.apple.com/us/song/1488408568",
       spotify: "https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b"
     }
   },
