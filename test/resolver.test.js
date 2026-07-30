@@ -95,6 +95,21 @@ test("extracts links from surrounding message text", () => {
   assert.equal(result.target_service, "spotify");
 });
 
+test("prefers Apple's explicit track selection when shared input contains multiple links", () => {
+  const result = resolveLink({
+    input_url: [
+      "https://music.apple.com/us/song/1499378607",
+      "https://music.apple.com/us/song/1499378607",
+      "https://music.apple.com/us/album/blinding-lights/1488408555?i=1488408568",
+      "https://music.apple.com/us/album/blinding-lights-single/1488408555"
+    ].join("\n"),
+    target_service: "spotify"
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.url, "https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b");
+});
+
 test("rejects unsupported source services", () => {
   const result = resolveLink({
     input_url: "https://example.com/song/123",

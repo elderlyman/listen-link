@@ -1,18 +1,44 @@
 export function validateUrl(input) {
-  return new URL(extractFirstUrl(input)).toString();
+  return new URL(extractPreferredUrl(input)).toString();
 }
 
 export function extractFirstUrl(input) {
+  return extractUrls(input)[0];
+}
+
+export function extractPreferredUrl(input) {
+  const urls = extractUrls(input);
+  return urls.reduce((preferred, candidate) =>
+    musicUrlPriority(candidate) > musicUrlPriority(preferred) ? candidate : preferred
+  );
+}
+
+function extractUrls(input) {
   if (typeof input !== "string") {
     throw new TypeError("input_url must be a string");
   }
 
-  const match = input.match(/https?:\/\/[^\s<>"']+/i);
-  if (!match) {
+  const matches = input.match(/https?:\/\/[^\s<>"'\[\]()]+/gi);
+  if (!matches) {
     throw new Error("No URL found in input");
   }
 
-  return match[0];
+  return matches;
+}
+
+function musicUrlPriority(inputUrl) {
+  try {
+    const url = new URL(inputUrl);
+    const service = detectService(url);
+
+    if (service === "apple" && url.searchParams.has("i")) return 40;
+    if (service === "spotify" && url.pathname.includes("/track/")) return 30;
+    if (service === "apple" && url.pathname.includes("/song/")) return 30;
+    if (service !== "unknown") return 20;
+    return 10;
+  } catch {
+    return 0;
+  }
 }
 
 export function detectService(inputUrl) {
